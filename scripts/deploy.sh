@@ -5,12 +5,12 @@ DEPLOY_DIR="${DEPLOY_DIR:-/home/ec2-user/safecall}"
 INFRA_SOURCE_DIR="${INFRA_SOURCE_DIR:-/home/ec2-user/source/SafeCall_infra}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
 SERVER_CONTAINER="${SERVER_CONTAINER:-safecall-server}"
-NGINX_CONTAINER="${NGINX_CONTAINER:-nginx}"
+NGINX_CONTAINER="${NGINX_CONTAINER:-safecall-nginx}"
 DOMAIN="${DOMAIN:-api.dev-safecall.r-e.kr}"
 AWS_REGION="${AWS_REGION:-ap-northeast-2}"
 SECRET_ID="${SECRET_ID:-safecall/prod}"
 ENV_FILE="${ENV_FILE:-.env}"
-SMOKE_URL="${SMOKE_URL:-http://localhost/error}"
+SMOKE_URL="${SMOKE_URL:-}"
 SMOKE_EXPECTED_STATUS="${SMOKE_EXPECTED_STATUS:-404}"
 SMOKE_MAX_ATTEMPTS="${SMOKE_MAX_ATTEMPTS:-30}"
 SMOKE_SLEEP_SECONDS="${SMOKE_SLEEP_SECONDS:-5}"
@@ -40,6 +40,14 @@ if [ -f "$CERT_PATH" ] && [ -f "$HTTPS_TEMPLATE" ]; then
     cp "$HTTPS_TEMPLATE" nginx/conf.d/safecall.conf
 fi
 
+if [ -z "$SMOKE_URL" ]; then
+    if [ -f "$CERT_PATH" ]; then
+        SMOKE_URL="https://localhost/error"
+    else
+        SMOKE_URL="http://localhost/error"
+    fi
+fi
+
 umask 077
 aws secretsmanager get-secret-value \
     --region "$AWS_REGION" \
@@ -51,11 +59,11 @@ chmod 600 "$ENV_FILE"
 
 docker compose -f "$COMPOSE_FILE" config --quiet
 docker compose -f "$COMPOSE_FILE" pull
-docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+docker compose -f "$COMPOSE_FILE" up -d --remove-orphans safecall-server nginx
 docker compose -f "$COMPOSE_FILE" ps
 
 for attempt in $(seq 1 "$SMOKE_MAX_ATTEMPTS"); do
-    status="$(curl -s -o /tmp/safecall-smoke.out -w '%{http_code}' "$SMOKE_URL" || true)"
+    status="$(curl -k -s -o /tmp/safecall-smoke.out -w '%{http_code}' "$SMOKE_URL" || true)"
     if [ "$status" = "$SMOKE_EXPECTED_STATUS" ]; then
         echo "Smoke check succeeded."
         docker image prune -af
