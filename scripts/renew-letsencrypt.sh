@@ -10,7 +10,12 @@ cd "$DEPLOY_DIR"
 
 docker compose -f "$COMPOSE_FILE" run --rm certbot renew --webroot -w /var/www/certbot
 
-if [ -f "certbot/conf/live/$DOMAIN/fullchain.pem" ] && [ -f "nginx/conf.d/safecall.https.conf.template" ]; then
+certificate_exists() {
+    docker compose -f "$COMPOSE_FILE" run --rm --entrypoint sh certbot \
+        -c "test -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem" >/dev/null 2>&1
+}
+
+if certificate_exists && [ -f "nginx/conf.d/safecall.https.conf.template" ]; then
     cp nginx/conf.d/safecall.https.conf.template nginx/conf.d/safecall.conf
 fi
 

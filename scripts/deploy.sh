@@ -36,7 +36,12 @@ fi
 HTTPS_TEMPLATE="nginx/conf.d/safecall.https.conf.template"
 CERT_PATH="certbot/conf/live/$DOMAIN/fullchain.pem"
 
-if [ -f "$CERT_PATH" ] && [ -f "$HTTPS_TEMPLATE" ]; then
+certificate_exists() {
+    docker compose -f "$COMPOSE_FILE" run --rm --entrypoint sh certbot \
+        -c "test -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem" >/dev/null 2>&1
+}
+
+if certificate_exists && [ -f "$HTTPS_TEMPLATE" ]; then
     cp "$HTTPS_TEMPLATE" nginx/conf.d/safecall.conf
 fi
 
