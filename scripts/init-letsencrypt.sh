@@ -7,7 +7,7 @@ COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
 DOMAIN="${DOMAIN:-api.dev-safecall.r-e.kr}"
 LETSENCRYPT_EMAIL="${LETSENCRYPT_EMAIL:-}"
 STAGING="${STAGING:-0}"
-NGINX_CONTAINER="${NGINX_CONTAINER:-safecall-nginx}"
+NGINX_CONTAINER="${NGINX_CONTAINER:-nginx}"
 
 if [ -z "$LETSENCRYPT_EMAIL" ]; then
     echo "LETSENCRYPT_EMAIL is required."

@@ -4,7 +4,7 @@ set -euo pipefail
 DEPLOY_DIR="${DEPLOY_DIR:-/home/ec2-user/safecall}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
 DOMAIN="${DOMAIN:-api.dev-safecall.r-e.kr}"
-NGINX_CONTAINER="${NGINX_CONTAINER:-safecall-nginx}"
+NGINX_CONTAINER="${NGINX_CONTAINER:-nginx}"
 
 cd "$DEPLOY_DIR"
 
