@@ -6,6 +6,7 @@ INFRA_SOURCE_DIR="${INFRA_SOURCE_DIR:-/home/ec2-user/source/SafeCall_infra}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
 SERVER_CONTAINER="${SERVER_CONTAINER:-safecall-server}"
 NGINX_CONTAINER="${NGINX_CONTAINER:-safecall-nginx}"
+DOMAIN="${DOMAIN:-api.dev-safecall.r-e.kr}"
 AWS_REGION="${AWS_REGION:-ap-northeast-2}"
 SECRET_ID="${SECRET_ID:-safecall/prod}"
 ENV_FILE="${ENV_FILE:-.env}"
@@ -30,6 +31,13 @@ if [ -d "$INFRA_SOURCE_DIR" ]; then
         cp "$INFRA_SOURCE_DIR"/scripts/*.sh scripts/ 2>/dev/null || true
         chmod +x scripts/*.sh 2>/dev/null || true
     fi
+fi
+
+HTTPS_TEMPLATE="nginx/conf.d/safecall.https.conf.template"
+CERT_PATH="certbot/conf/live/$DOMAIN/fullchain.pem"
+
+if [ -f "$CERT_PATH" ] && [ -f "$HTTPS_TEMPLATE" ]; then
+    cp "$HTTPS_TEMPLATE" nginx/conf.d/safecall.conf
 fi
 
 umask 077
