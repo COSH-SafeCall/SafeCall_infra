@@ -40,7 +40,12 @@ fi
 
 docker compose -f "$COMPOSE_FILE" up -d nginx
 
-if [ -f "certbot/conf/live/$DOMAIN/fullchain.pem" ]; then
+certificate_exists() {
+    docker compose -f "$COMPOSE_FILE" run --rm --entrypoint sh certbot \
+        -c "test -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem" >/dev/null 2>&1
+}
+
+if certificate_exists; then
     echo "Certificate already exists for $DOMAIN. Switching nginx to HTTPS config."
 else
     staging_args=()
@@ -59,7 +64,7 @@ else
         -d "$DOMAIN"
 fi
 
-if [ ! -f "certbot/conf/live/$DOMAIN/fullchain.pem" ]; then
+if ! certificate_exists; then
     echo "Certificate was not created: certbot/conf/live/$DOMAIN/fullchain.pem"
     exit 1
 fi
