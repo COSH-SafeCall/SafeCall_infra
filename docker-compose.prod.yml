@@ -1,6 +1,6 @@
 services:
   safecall-server:
-    image: ghcr.io/OWNER/safecall-server:latest
+    image: ghcr.io/cosh-safecall/safecall-server:latest
     container_name: safecall-server
     restart: unless-stopped
     env_file:
