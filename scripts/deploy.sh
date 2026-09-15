@@ -23,8 +23,7 @@ if [ -d "$INFRA_SOURCE_DIR" ]; then
     cp "$INFRA_SOURCE_DIR/docker-compose.prod.yml" "$COMPOSE_FILE"
 
     if [ -d "$INFRA_SOURCE_DIR/nginx" ]; then
-        rm -rf nginx
-        cp -r "$INFRA_SOURCE_DIR/nginx" nginx
+        cp -a "$INFRA_SOURCE_DIR/nginx/." nginx/
     fi
 
     if [ -d "$INFRA_SOURCE_DIR/scripts" ]; then
@@ -56,7 +55,8 @@ chmod 600 "$ENV_FILE"
 
 docker compose -f "$COMPOSE_FILE" config --quiet
 docker compose -f "$COMPOSE_FILE" pull
-docker compose -f "$COMPOSE_FILE" up -d --remove-orphans safecall-server nginx
+docker compose -f "$COMPOSE_FILE" up -d --remove-orphans safecall-server
+docker compose -f "$COMPOSE_FILE" up -d --force-recreate --no-deps nginx
 docker compose -f "$COMPOSE_FILE" ps
 
 for attempt in $(seq 1 "$SMOKE_MAX_ATTEMPTS"); do
