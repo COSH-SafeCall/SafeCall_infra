@@ -56,6 +56,7 @@ chmod 600 "$ENV_FILE"
 docker compose -f "$COMPOSE_FILE" config --quiet
 docker compose -f "$COMPOSE_FILE" pull
 docker compose -f "$COMPOSE_FILE" up -d --remove-orphans safecall-server
+docker compose -f "$COMPOSE_FILE" run --rm --no-deps nginx nginx -t
 docker compose -f "$COMPOSE_FILE" up -d --force-recreate --no-deps nginx
 docker compose -f "$COMPOSE_FILE" ps
 
